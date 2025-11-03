@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-Host server
+Host web-01
     HostName 98.93.156.54
     User ubuntu
     IdentityFile ~/.ssh/school
