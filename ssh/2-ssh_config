@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# SSH client configuration for ALU tasks
 Host web-01
     HostName 98.93.156.54
     User ubuntu
