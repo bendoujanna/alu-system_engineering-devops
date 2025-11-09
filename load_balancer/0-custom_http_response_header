@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#configure Nginx to add a custom HTTP response header
+# Ignore SC2154 for shellcheck
+#install Nginx if it's not installed
+apt-get update -y
+apt-get install -y nginx
+
+# Get the hostname of the server
+SERVER_NAME=$(hostname)
+
+# Path to Nginx default config file
+CONFIG_FILE="/etc/nginx/sites-available/default"
+
+# Add or update the custom header inside the location block
+if grep -q "add_header X-Served-By" "$CONFIG_FILE"; then
+    sed -i "s/add_header X-Served-By.*/add_header X-Served-By '$SERVER_NAME';/" "$CONFIG_FILE"
+else
+    sed -i "/server_name _;/a \\\tadd_header X-Served-By '$SERVER_NAME';" "$CONFIG_FILE"
+fi
+
+# Restart Nginx to apply the change
+systemctl restart nginx
