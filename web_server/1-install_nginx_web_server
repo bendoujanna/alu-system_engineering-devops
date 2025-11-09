@@ -5,13 +5,8 @@
 apt-get update -y
 apt-get install -y nginx
 
-# Make sure Nginx listens on port 80
-NGINX_CONF="/etc/nginx/sites-available/default"
-sed -i 's/listen 80 default_server;/listen 80;/' "$NGINX_CONF"
-sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:80;/' "$NGINX_CONF"
-
 # Replace default page with our content
 echo "Holberton School" > /var/www/html/index.html
 
 # Restart Nginx using service
-service nginx restart
+service nginx start || service nginx restart
