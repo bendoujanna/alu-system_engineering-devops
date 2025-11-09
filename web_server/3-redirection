@@ -29,10 +29,13 @@ awk '
 /server\s*{/ {
     print
     print "    location = /redirect_me { return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4; }"
+    print "    location = /redirect_me/ { return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4; }"
     next
 }
 {print}
 ' "$NGINX_CONF" > "${NGINX_CONF}.tmp" && mv "${NGINX_CONF}.tmp" "$NGINX_CONF"
 
+# Test syntax
+nginx -t
 # Reload Nginx to apply changes
 nginx -s reload
