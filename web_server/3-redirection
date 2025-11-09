@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#install and configure Nginx on a new Ubuntu server
+# and add a 301 redirect for /redirect_me
+
+set -e
+
+# Update package list and install nginx
+apt-get update -y
+apt-get install -y nginx
+
+# Replace default page with our content
+echo "Holberton School" > /var/www/html/index.html
+
+# Start or restart Nginx
+service nginx start || service nginx restart
+
+# Nginx default config file
+NGINX_CONF="/etc/nginx/sites-available/default"
+
+# Backup config if not already done
+if [ ! -f "${NGINX_CONF}.bak" ]; then
+    cp "$NGINX_CONF" "${NGINX_CONF}.bak"
+fi
+
+# Add /redirect_me location block if it doesn't exist
+if ! grep -q "location /redirect_me" "$NGINX_CONF"; then
+    sed -i '/server_name _;/a \
+    location /redirect_me/ {\
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\
+    }' "$NGINX_CONF"
+fi
+
+# Reload Nginx to apply changes
+nginx -s reload
+
