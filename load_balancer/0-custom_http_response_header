@@ -19,4 +19,4 @@ else
 fi
 
 # Restart Nginx to apply the change
-systemctl restart nginx
+service nginx restart
