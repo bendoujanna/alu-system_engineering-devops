@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Bash script to display information about subdomains
+
+domain=$1
+subdomain=$2
+
+# Function to query a subdomain
+get_record() {
+    local sd=$1
+    local dom=$2
+    # Use dig to get the record type and IP
+    dig_output=$(dig +short $sd.$dom)
+    if [ -z "$dig_output" ]; then
+        echo "The subdomain $sd does not exist or has no A record"
+    else
+        # Extract record type using dig +noall +answer
+        record_type=$(dig $sd.$dom +noall +answer | awk '{print $4}')
+        echo "The subdomain $sd is a $record_type record and points to $dig_output"
+    fi
+}
+
+# If a specific subdomain is provided
+if [ -n "$subdomain" ]; then
+    get_record $subdomain $domain
+else
+    # Default order: www, lb-01, web-01, web-02
+    for sd in www lb-01 web-01 web-02; do
+        get_record $sd $domain
+    done
+fi
+
