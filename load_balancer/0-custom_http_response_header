@@ -1,22 +1,42 @@
 #!/usr/bin/env bash
-#configure Nginx to add a custom HTTP response header
+#!/usr/bin/env bash
+# Configure Nginx to include a custom HTTP header with the server hostname
 # Ignore SC2154 for shellcheck
-#install Nginx if it's not installed
+set -e
+
+# Update package list and install Nginx if not installed
 apt-get update -y
 apt-get install -y nginx
 
-# Get the hostname of the server
-SERVER_NAME=$(hostname)
+# Ensure /var/www/html exists
+mkdir -p /var/www/html
 
-# Path to Nginx default config file
-CONFIG_FILE="/etc/nginx/sites-available/default"
+# Add default index page
+echo "Holberton School" > /var/www/html/index.html
 
-# Add or update the custom header inside the location block
-if grep -q "add_header X-Served-By" "$CONFIG_FILE"; then
-    sed -i "s/add_header X-Served-By.*/add_header X-Served-By '$SERVER_NAME';/" "$CONFIG_FILE"
-else
-    sed -i "/server_name _;/a \\\tadd_header X-Served-By '$SERVER_NAME';" "$CONFIG_FILE"
-fi
+# Start or reload Nginx without systemctl
+service nginx start 2>/dev/null || service nginx restart
 
-# Restart Nginx to apply the change
-service nginx restart
+# Nginx default config file
+NGINX_CONF="/etc/nginx/sites-available/default"
+
+# Backup config if not already done
+[ ! -f "${NGINX_CONF}.bak" ] && cp "$NGINX_CONF" "${NGINX_CONF}.bak"
+
+# Add X-Served-By header inside the server block
+# It will dynamically use the hostname
+awk -v host="$(hostname)" '
+/server\s*{/ && !x {
+    print
+    print "    add_header X-Served-By \"" host "\";"
+    x=1
+    next
+}
+{print}
+' "$NGINX_CONF" > "${NGINX_CONF}.tmp" && mv "${NGINX_CONF}.tmp" "$NGINX_CONF"
+
+# Test configuration
+nginx -t
+
+# Reload Nginx
+nginx -s reload
